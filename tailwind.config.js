@@ -1,12 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{vue,js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
       colors: {
+        slate: {
+          950: '#0f172a',
+        },
         blue9: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -19,8 +22,8 @@ export default {
           800: '#1e40af',
           900: '#1e3a8a',
           950: '#172554',
-        }
-      }
+        },
+      },
     },
   },
   plugins: [],

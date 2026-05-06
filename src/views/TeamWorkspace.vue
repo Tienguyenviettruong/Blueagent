@@ -12,25 +12,22 @@ import {
   AlertCircle
 } from 'lucide-vue-next'
 import { useAgentStore } from '@/stores/agentStore'
+import type { Team, DebateArgument } from '@/types'
 
 const store = useAgentStore()
 
-const teams = ref([
+const teams = ref<Team[]>([
   {
     id: 'team-1',
     name: 'Product Development',
     purpose: 'Develop new features and products',
-    members: 3,
-    status: 'active',
-    debates: 5
+    members: ['agent-1', 'agent-2', 'agent-3']
   },
   {
     id: 'team-2',
     name: 'Research Team',
     purpose: 'Market research and analysis',
-    members: 2,
-    status: 'active',
-    debates: 3
+    members: ['agent-3', 'agent-4']
   }
 ])
 
@@ -44,24 +41,22 @@ const currentDebate = ref({
   consensus_threshold: 0.7
 })
 
-const arguments = ref([
+const debateArguments = ref<DebateArgument[]>([
   {
     id: 'arg-1',
+    debate_id: 'debate-1',
     author: 'Architect',
     claim: 'We should use microservices architecture for better scalability',
     evidence: ['Scalability benefits', 'Independent deployment', 'Technology diversity'],
-    strength: 0.85,
-    type: 'proposal',
-    votes: { approve: 2, reject: 1, abstain: 0 }
+    strength: 0.85
   },
   {
     id: 'arg-2',
+    debate_id: 'debate-1',
     author: 'Critic',
     claim: 'Monolith is better for this use case due to lower complexity',
     evidence: ['Lower complexity', 'Faster development', 'Easier debugging'],
-    strength: 0.75,
-    type: 'critique',
-    votes: { approve: 1, reject: 2, abstain: 0 }
+    strength: 0.75
   }
 ])
 
@@ -74,9 +69,9 @@ const phaseSteps = [
   { id: 'conclusion', label: 'Conclusion', done: false }
 ]
 
-onMounted(() => {
-  store.fetchTeams()
-  store.fetchDebateArguments('debate-1')
+onMounted(async () => {
+  await store.fetchTeams()
+  await store.fetchDebateArguments('debate-1')
 })
 </script>
 
@@ -103,21 +98,13 @@ onMounted(() => {
           <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center">
             <Users class="w-6 h-6 text-white" />
           </div>
-          <span :class="[
-            'px-2 py-0.5 text-xs rounded-full',
-            team.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-600 text-slate-400'
-          ]">{{ team.status }}</span>
         </div>
         <h3 class="text-lg font-semibold text-white">{{ team.name }}</h3>
         <p class="text-sm text-slate-400 mt-1">{{ team.purpose }}</p>
         <div class="flex items-center gap-4 mt-4">
           <div class="flex items-center gap-1">
             <Users class="w-4 h-4 text-slate-400" />
-            <span class="text-sm text-slate-300">{{ team.members }} members</span>
-          </div>
-          <div class="flex items-center gap-1">
-            <MessageSquare class="w-4 h-4 text-slate-400" />
-            <span class="text-sm text-slate-300">{{ team.debates }} debates</span>
+            <span class="text-sm text-slate-300">{{ team.members.length }} members</span>
           </div>
         </div>
       </div>
@@ -169,15 +156,11 @@ onMounted(() => {
       </div>
 
       <div class="space-y-4">
-        <div
-          v-for="arg in arguments"
-          :key="arg.id"
-          :class="[
-            'p-5 rounded-xl border',
-            arg.type === 'proposal' ? 'bg-blue9-500/10 border-blue9-500/30' :
-            arg.type === 'critique' ? 'bg-red-500/10 border-red-500/30' : 'bg-slate-700 border-slate-600'
-          ]"
-        >
+          <div
+            v-for="arg in debateArguments"
+            :key="arg.id"
+            class="p-5 rounded-xl border bg-slate-600 bg-slate-700 border-slate-600"
+          >
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 bg-gradient-to-br from-blue9-500 to-blue9-700 rounded-full flex items-center justify-center">
@@ -185,11 +168,6 @@ onMounted(() => {
               </div>
               <div>
                 <h4 class="font-semibold text-white">{{ arg.author }}</h4>
-                <span :class="[
-                  'text-xs px-2 py-0.5 rounded-full',
-                  arg.type === 'proposal' ? 'bg-blue9-500/20 text-blue9-400' :
-                  arg.type === 'critique' ? 'bg-red-500/20 text-red-400' : 'bg-slate-600 text-slate-300'
-                ]">{{ arg.type }}</span>
               </div>
             </div>
             <div class="flex items-center gap-1">
@@ -204,19 +182,9 @@ onMounted(() => {
               <span
                 v-for="(item, index) in arg.evidence"
                 :key="index"
-                class="px-3 py-1 bg-slate-700 text-slate-300 text-xs rounded-full"
+                class="px-3 py-1 bg-slate-600 text-slate-300 text-xs rounded-full"
               >{{ item }}</span>
             </div>
-          </div>
-          <div class="mt-4 flex items-center gap-4">
-            <button class="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
-              <CheckCircle2 class="w-4 h-4" />
-              <span class="text-sm">{{ arg.votes.approve }}</span>
-            </button>
-            <button class="flex items-center gap-1 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors">
-              <XCircle class="w-4 h-4" />
-              <span class="text-sm">{{ arg.votes.reject }}</span>
-            </button>
           </div>
         </div>
       </div>

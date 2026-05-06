@@ -11,6 +11,7 @@ import {
   ChevronRight
 } from 'lucide-vue-next'
 import { useAgentStore } from '@/stores/agentStore'
+import type { Workflow } from '@/types'
 
 const store = useAgentStore()
 const stats = ref([
@@ -27,15 +28,67 @@ const recentActivities = ref([
   { id: 4, agent: 'Executor', action: 'joined team', time: '2 hours ago', type: 'success' }
 ])
 
-const workflows = ref([
-  { id: 'wf-1', name: 'Product Development', progress: 65, status: 'running' },
-  { id: 'wf-2', name: 'Market Research', progress: 30, status: 'paused' },
-  { id: 'wf-3', name: 'Quality Assurance', progress: 100, status: 'completed' }
+const workflows = ref<Workflow[]>([
+  {
+    id: 'wf-1',
+    name: 'Product Development',
+    description: 'End-to-end product development workflow',
+    version: 1,
+    created_at: Date.now(),
+    updated_at: Date.now(),
+    tags: ['development', 'product'],
+    nodes: [],
+    execution: {
+      instance_id: 'exec-1',
+      status: 'running',
+      start_time: Date.now(),
+      token_usage: 0,
+      context: {},
+      events: []
+    }
+  },
+  {
+    id: 'wf-2',
+    name: 'Market Research',
+    description: 'Research and analysis workflow',
+    version: 1,
+    created_at: Date.now(),
+    updated_at: Date.now(),
+    tags: ['research', 'market'],
+    nodes: [],
+    execution: {
+      instance_id: 'exec-2',
+      status: 'paused',
+      start_time: Date.now(),
+      token_usage: 0,
+      context: {},
+      events: []
+    }
+  },
+  {
+    id: 'wf-3',
+    name: 'Quality Assurance',
+    description: 'Testing and QA workflow',
+    version: 1,
+    created_at: Date.now(),
+    updated_at: Date.now(),
+    tags: ['qa', 'testing'],
+    nodes: [],
+    execution: {
+      instance_id: 'exec-3',
+      status: 'completed',
+      start_time: Date.now(),
+      end_time: Date.now(),
+      token_usage: 0,
+      context: {},
+      events: []
+    }
+  }
 ])
 
-onMounted(() => {
-  store.fetchAgents()
-  store.fetchTeams()
+onMounted(async () => {
+  await store.fetchAgents()
+  await store.fetchTeams()
 })
 </script>
 
@@ -119,22 +172,21 @@ onMounted(() => {
               <span class="text-sm font-medium text-white">{{ workflow.name }}</span>
               <span :class="[
                 'text-xs px-2 py-1 rounded-full',
-                workflow.status === 'running' ? 'bg-green-500/20 text-green-400' :
-                workflow.status === 'paused' ? 'bg-yellow-500/20 text-yellow-400' :
+                workflow.execution?.status === 'running' ? 'bg-green-500/20 text-green-400' :
+                workflow.execution?.status === 'paused' ? 'bg-yellow-500/20 text-yellow-400' :
                 'bg-slate-600 text-slate-300'
-              ]">{{ workflow.status }}</span>
+              ]">{{ workflow.execution?.status }}</span>
             </div>
             <div class="h-2 bg-slate-600 rounded-full overflow-hidden">
               <div
                 :class="[
                   'h-full rounded-full transition-all',
-                  workflow.status === 'running' ? 'bg-green-500' :
-                  workflow.status === 'paused' ? 'bg-yellow-500' : 'bg-slate-500'
+                  workflow.execution?.status === 'running' ? 'bg-green-500' :
+                  workflow.execution?.status === 'paused' ? 'bg-yellow-500' : 'bg-slate-500'
                 ]"
-                :style="{ width: `${workflow.progress}%` }"
+                :style="{ width: workflow.execution?.status === 'completed' ? '100%' : workflow.execution?.status === 'running' ? '65%' : '30%' }"
               ></div>
             </div>
-            <p class="text-xs text-slate-400 mt-2">{{ workflow.progress }}% complete</p>
           </div>
         </div>
       </div>

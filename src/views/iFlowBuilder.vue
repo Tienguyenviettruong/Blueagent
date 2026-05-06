@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   Plus,
   Play,
@@ -16,6 +16,7 @@ import {
   Database
 } from 'lucide-vue-next'
 import { useAgentStore } from '@/stores/agentStore'
+import type { WorkflowNode } from '@/types'
 
 const store = useAgentStore()
 
@@ -32,10 +33,10 @@ const nodeTypes = [
   { type: 'delay', label: 'Delay', icon: Clock, color: 'bg-slate-500' }
 ]
 
-const nodes = ref([
-  { id: 'node-1', type: 'agent_task', label: 'Analyze Requirements', x: 100, y: 150 },
-  { id: 'node-2', type: 'debate_session', label: 'Design Debate', x: 350, y: 150 },
-  { id: 'node-3', type: 'decision', label: 'Approve Design', x: 600, y: 150 }
+const nodes = ref<WorkflowNode[]>([
+  { id: 'node-1', node_type: 'agent_task', label: 'Analyze Requirements', position: [100, 150] },
+  { id: 'node-2', node_type: 'debate_session', label: 'Design Debate', position: [350, 150] },
+  { id: 'node-3', node_type: 'decision', label: 'Approve Design', position: [600, 150] }
 ])
 
 const edges = ref([
@@ -44,6 +45,10 @@ const edges = ref([
 ])
 
 const selectedNode = ref<string | null>(null)
+
+// Helper to get x and y from position tuple
+const getNodeX = (node: WorkflowNode) => node.position[0]
+const getNodeY = (node: WorkflowNode) => node.position[1]
 
 onMounted(() => {
   store.fetchWorkflowNodes('workflow-1')
@@ -118,10 +123,10 @@ onMounted(() => {
           <line
             v-for="(edge, index) in edges"
             :key="index"
-            :x1="(nodes.find(n => n.id === edge.source)?.x || 0) + 60"
-            :y1="(nodes.find(n => n.id === edge.source)?.y || 0) + 30"
-            :x2="(nodes.find(n => n.id === edge.target)?.x || 0)"
-            :y2="(nodes.find(n => n.id === edge.target)?.y || 0) + 30"
+            :x1="getNodeX(nodes.find(n => n.id === edge.source) || { position: [0, 0] }) + 60"
+            :y1="getNodeY(nodes.find(n => n.id === edge.source) || { position: [0, 0] }) + 30"
+            :x2="getNodeX(nodes.find(n => n.id === edge.target) || { position: [0, 0] })"
+            :y2="getNodeY(nodes.find(n => n.id === edge.target) || { position: [0, 0] }) + 30"
             stroke="#64748b"
             stroke-width="2"
             marker-end="url(#arrowhead)"
@@ -137,25 +142,25 @@ onMounted(() => {
               ? 'bg-blue9-500/20 border-blue9-500 shadow-lg shadow-blue9-500/20'
               : 'bg-slate-700 border-slate-600 hover:border-blue9-500'
           ]"
-          :style="{ left: `${node.x}px`, top: `${node.y}px` }"
+          :style="{ left: `${getNodeX(node)}px`, top: `${getNodeY(node)}px` }"
           @click="selectedNode = node.id"
         >
           <div class="flex items-center gap-3">
             <div :class="[
               'w-10 h-10 rounded-lg flex items-center justify-center',
-              node.type === 'agent_task' ? 'bg-blue9-500' :
-              node.type === 'debate_session' ? 'bg-purple-500' :
-              node.type === 'decision' ? 'bg-yellow-500' :
-              node.type === 'parallel_split' ? 'bg-green-500' : 'bg-slate-500'
+              node.node_type === 'agent_task' ? 'bg-blue9-500' :
+              node.node_type === 'debate_session' ? 'bg-purple-500' :
+              node.node_type === 'decision' ? 'bg-yellow-500' :
+              node.node_type === 'parallel_split' ? 'bg-green-500' : 'bg-slate-500'
             ]">
               <component
-                :is="nodeTypes.find(t => t.type === node.type)?.icon"
+                :is="nodeTypes.find(t => t.type === node.node_type)?.icon"
                 class="w-5 h-5 text-white"
               />
             </div>
             <div>
               <p class="text-sm font-medium text-white">{{ node.label }}</p>
-              <p class="text-xs text-slate-400">{{ node.type }}</p>
+              <p class="text-xs text-slate-400">{{ node.node_type }}</p>
             </div>
           </div>
         </div>
@@ -182,8 +187,18 @@ onMounted(() => {
         <div>
           <label class="text-xs text-slate-400 mb-1 block">Position</label>
           <div class="flex gap-2">
-            <input type="number" placeholder="X" class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue9-500" />
-            <input type="number" placeholder="Y" class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue9-500" />
+            <input
+              type="number"
+              placeholder="X"
+              :value="getNodeX(nodes.find(n => n.id === selectedNode) || { position: [0, 0] })"
+              class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue9-500"
+            />
+            <input
+              type="number"
+              placeholder="Y"
+              :value="getNodeY(nodes.find(n => n.id === selectedNode) || { position: [0, 0] })"
+              class="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue9-500"
+            />
           </div>
         </div>
         <div>

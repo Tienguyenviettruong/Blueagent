@@ -4,18 +4,20 @@
   "description": "Multi-Agent Orchestration Platform with Humanlike Debate & Collaborative Intelligence",
   "type": "module",
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tauri build",
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "typecheck": "vue-tsc --noEmit"
+    "tauri": "tauri",
+    "lint": "eslint src --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "format": "prettier --write src/"
   },
   "dependencies": {
+    "@tauri-apps/api": "^1.5.6",
     "@vueuse/core": "^10.9.0",
     "lucide-vue-next": "^0.364.0",
+    "pinia": "^2.1.7",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "pinia": "^2.1.7"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.6",
@@ -24,7 +26,11 @@
     "@vue/eslint-config-typescript": "^12.0.0",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-vue": "^9.21.1",
     "postcss": "^8.4.35",
+    "prettier": "^3.2.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^5.1.3",

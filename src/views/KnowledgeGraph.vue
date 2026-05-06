@@ -11,70 +11,152 @@ import {
   ChevronRight
 } from 'lucide-vue-next'
 import { useAgentStore } from '@/stores/agentStore'
+import type { KnowledgeItem, GraphNode, GraphEdge, Brain } from '@/types'
 
 const store = useAgentStore()
 const searchQuery = ref('')
 
-const brains = ref([
-  { id: 'brain-1', name: 'Product Knowledge', items: 45, updated: '2 min ago', type: 'team' },
-  { id: 'brain-2', name: 'Research Database', items: 32, updated: '1 hour ago', type: 'organization' },
-  { id: 'brain-3', name: 'Personal Notes', items: 50, updated: '5 min ago', type: 'agent' }
+const brains = ref<Brain[]>([
+  {
+    id: 'brain-1',
+    name: 'Product Knowledge',
+    description: 'Knowledge about product development',
+    owner_scope: 'team',
+    storage: { type: 'local', encryption: false },
+    indexing: { embedding_model: 'openai', chunk_size: 1024, overlap: 256 }
+  },
+  {
+    id: 'brain-2',
+    name: 'Research Database',
+    description: 'Research findings and analysis',
+    owner_scope: 'organization',
+    storage: { type: 'local', encryption: true },
+    indexing: { embedding_model: 'claude', chunk_size: 512, overlap: 128 }
+  },
+  {
+    id: 'brain-3',
+    name: 'Personal Notes',
+    description: 'Agent personal knowledge',
+    owner_scope: 'agent',
+    storage: { type: 'local', encryption: false },
+    indexing: { embedding_model: 'ollama', chunk_size: 2048, overlap: 512 }
+  }
 ])
 
-const knowledgeItems = ref([
+const knowledgeItems = ref<KnowledgeItem[]>([
   {
     id: 'item-1',
     title: 'Microservices Best Practices',
     content: 'Guidelines for implementing microservices architecture including service boundaries, communication patterns, and deployment strategies...',
+    format: 'markdown',
+    metadata: {
+      author: 'agent-1',
+      domain: ['architecture', 'backend'],
+      language: 'English',
+      complexity: 'complex',
+      use_cases: ['scaling', 'deployment'],
+      related_tasks: ['task-1']
+    },
+    embeddings: [],
+    links: [],
     tags: ['architecture', 'microservices', 'best-practices'],
     confidence: 0.95,
-    updated: '2024-01-15',
-    source: 'agent_interaction'
+    source: { origin: 'agent_interaction', agent_id: 'agent-1', session_id: 'session-1' },
+    version: 1,
+    created_at: Date.now(),
+    updated_at: Date.now()
   },
   {
     id: 'item-2',
     title: 'Team Collaboration Strategies',
     content: 'Effective collaboration patterns for multi-agent teams including communication protocols and role definitions...',
+    format: 'markdown',
+    metadata: {
+      author: 'agent-3',
+      domain: ['teamwork', 'collaboration'],
+      language: 'English',
+      complexity: 'moderate',
+      use_cases: ['teamwork', 'debates'],
+      related_tasks: ['task-2']
+    },
+    embeddings: [],
+    links: [],
     tags: ['team', 'collaboration', 'communication'],
     confidence: 0.88,
-    updated: '2024-01-14',
-    source: 'manual_entry'
+    source: { origin: 'manual_entry' },
+    version: 2,
+    created_at: Date.now(),
+    updated_at: Date.now()
   },
   {
     id: 'item-3',
     title: 'API Design Principles',
     content: 'RESTful API design principles including resource naming, status codes, and error handling...',
+    format: 'markdown',
+    metadata: {
+      author: 'agent-2',
+      domain: ['api', 'design'],
+      language: 'English',
+      complexity: 'moderate',
+      use_cases: ['api-design', 'development'],
+      related_tasks: ['task-3']
+    },
+    embeddings: [],
+    links: [],
     tags: ['api', 'design', 'rest'],
     confidence: 0.92,
-    updated: '2024-01-13',
-    source: 'imported'
+    source: { origin: 'imported' },
+    version: 1,
+    created_at: Date.now(),
+    updated_at: Date.now()
   },
   {
     id: 'item-4',
     title: 'Debate Protocol Guidelines',
     content: 'Formal debate protocols for structured agent discussions including argument submission and voting procedures...',
+    format: 'markdown',
+    metadata: {
+      author: 'agent-3',
+      domain: ['debate', 'governance'],
+      language: 'English',
+      complexity: 'moderate',
+      use_cases: ['debates', 'decision-making'],
+      related_tasks: ['task-4']
+    },
+    embeddings: [],
+    links: [],
     tags: ['debate', 'protocol', 'consensus'],
     confidence: 0.85,
-    updated: '2024-01-12',
-    source: 'agent_interaction'
+    source: { origin: 'agent_interaction', agent_id: 'agent-3' },
+    version: 1,
+    created_at: Date.now(),
+    updated_at: Date.now()
   }
 ])
 
-const graphNodes = ref([
-  { id: 'n1', label: 'Microservices', x: 300, y: 100, type: 'concept' },
-  { id: 'n2', label: 'API Design', x: 150, y: 250, type: 'procedure' },
-  { id: 'n3', label: 'Team Collaboration', x: 450, y: 250, type: 'concept' },
-  { id: 'n4', label: 'Debate Protocol', x: 300, y: 400, type: 'decision' }
+const graphNodes = ref<GraphNode[]>([
+  { id: 'n1', label: 'Microservices', type: 'concept', properties: {} },
+  { id: 'n2', label: 'API Design', type: 'procedure', properties: {} },
+  { id: 'n3', label: 'Team Collaboration', type: 'concept', properties: {} },
+  { id: 'n4', label: 'Debate Protocol', type: 'decision', properties: {} }
 ])
 
-const graphEdges = ref([
-  { source: 'n1', target: 'n2', type: 'depends_on' },
-  { source: 'n1', target: 'n3', type: 'references' },
-  { source: 'n3', target: 'n4', type: 'evolves_from' }
+const graphEdges = ref<GraphEdge[]>([
+  { id: 'e1', source: 'n1', target: 'n2', type: 'depends_on', weight: 0.9 },
+  { id: 'e2', source: 'n1', target: 'n3', type: 'references', weight: 0.7 },
+  { id: 'e3', source: 'n3', target: 'n4', type: 'evolves_from', weight: 0.8 }
 ])
 
-onMounted(() => {
-  store.searchKnowledge('architecture')
+// Position map for rendering
+const nodePositions: Record<string, { x: number; y: number }> = {
+  'n1': { x: 300, y: 100 },
+  'n2': { x: 150, y: 250 },
+  'n3': { x: 450, y: 250 },
+  'n4': { x: 300, y: 400 }
+}
+
+onMounted(async () => {
+  await store.searchKnowledge('architecture')
 })
 </script>
 
@@ -144,9 +226,9 @@ onMounted(() => {
               <div class="flex items-center gap-4 mt-3 pt-3 border-t border-slate-600">
                 <span class="text-xs text-slate-500 flex items-center gap-1">
                   <Calendar class="w-3 h-3" />
-                  {{ item.updated }}
+                  {{ new Date(item.updated_at).toLocaleDateString() }}
                 </span>
-                <span class="text-xs text-slate-500">{{ item.source }}</span>
+                <span class="text-xs text-slate-500">{{ item.source.origin }}</span>
               </div>
             </div>
           </div>
@@ -172,16 +254,15 @@ onMounted(() => {
                   </div>
                   <div>
                     <h4 class="font-medium text-white">{{ brain.name }}</h4>
-                    <span class="text-xs text-slate-400">{{ brain.items }} items</span>
+                    <span class="text-xs text-slate-400">{{ brain.description }}</span>
                   </div>
                 </div>
                 <span :class="[
                   'px-2 py-0.5 text-xs rounded-full',
-                  brain.type === 'team' ? 'bg-blue9-500/20 text-blue9-400' :
-                  brain.type === 'organization' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'
-                ]">{{ brain.type }}</span>
+                  brain.owner_scope === 'team' ? 'bg-blue9-500/20 text-blue9-400' :
+                  brain.owner_scope === 'organization' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'
+                ]">{{ brain.owner_scope }}</span>
               </div>
-              <p class="text-xs text-slate-500 mt-2">Updated {{ brain.updated }}</p>
             </div>
           </div>
         </div>
@@ -201,10 +282,10 @@ onMounted(() => {
               <line
                 v-for="(edge, index) in graphEdges"
                 :key="index"
-                :x1="(graphNodes.find(n => n.id === edge.source)?.x || 0)"
-                :y1="(graphNodes.find(n => n.id === edge.source)?.y || 0)"
-                :x2="(graphNodes.find(n => n.id === edge.target)?.x || 0)"
-                :y2="(graphNodes.find(n => n.id === edge.target)?.y || 0)"
+                :x1="nodePositions[edge.source]?.x || 0"
+                :y1="nodePositions[edge.source]?.y || 0"
+                :x2="nodePositions[edge.target]?.x || 0"
+                :y2="nodePositions[edge.target]?.y || 0"
                 stroke="#64748b"
                 stroke-width="2"
                 marker-end="url(#graphArrow)"
@@ -212,8 +293,8 @@ onMounted(() => {
               <circle
                 v-for="node in graphNodes"
                 :key="node.id"
-                :cx="node.x"
-                :cy="node.y"
+                :cx="nodePositions[node.id]?.x || 0"
+                :cy="nodePositions[node.id]?.y || 0"
                 r="30"
                 :fill="node.type === 'concept' ? '#3b82f6' : node.type === 'procedure' ? '#f59e0b' : '#8b5cf6'"
                 class="cursor-pointer hover:opacity-80"
@@ -221,8 +302,8 @@ onMounted(() => {
               <text
                 v-for="node in graphNodes"
                 :key="node.id"
-                :x="node.x"
-                :y="node.y + 5"
+                :x="nodePositions[node.id]?.x || 0"
+                :y="(nodePositions[node.id]?.y || 0) + 5"
                 text-anchor="middle"
                 fill="white"
                 font-size="11"

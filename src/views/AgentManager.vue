@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   Plus,
   Search,
@@ -11,6 +11,7 @@ import {
   User
 } from 'lucide-vue-next'
 import { useAgentStore } from '@/stores/agentStore'
+import type { Agent } from '@/types'
 
 const store = useAgentStore()
 const searchQuery = ref('')
@@ -24,55 +25,16 @@ const roles = [
   { value: 'executor', label: 'Executor' }
 ]
 
-const agentList = ref([
-  {
-    id: 'agent-1',
-    name: 'Architect',
-    role: 'proposer',
-    provider: 'OpenAI',
-    status: 'active',
-    creativity: 0.8,
-    caution: 0.3,
-    verbosity: 0.6,
-    empathy: 0.5
-  },
-  {
-    id: 'agent-2',
-    name: 'Critic',
-    role: 'critic',
-    provider: 'Claude',
-    status: 'active',
-    creativity: 0.4,
-    caution: 0.9,
-    verbosity: 0.7,
-    empathy: 0.3
-  },
-  {
-    id: 'agent-3',
-    name: 'Synthesizer',
-    role: 'synthesizer',
-    provider: 'Gemini',
-    status: 'active',
-    creativity: 0.7,
-    caution: 0.5,
-    verbosity: 0.5,
-    empathy: 0.8
-  },
-  {
-    id: 'agent-4',
-    name: 'Executor',
-    role: 'executor',
-    provider: 'Ollama',
-    status: 'inactive',
-    creativity: 0.6,
-    caution: 0.7,
-    verbosity: 0.4,
-    empathy: 0.6
-  }
-])
+onMounted(async () => {
+  await store.fetchAgents()
+})
 
-onMounted(() => {
-  store.fetchAgents()
+const filteredAgents = computed(() => {
+  return store.agents.filter(agent => {
+    const matchesSearch = agent.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesRole = selectedRole.value === 'all' || agent.role === selectedRole.value
+    return matchesSearch && matchesRole
+  })
 })
 </script>
 
@@ -112,9 +74,20 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="grid grid-cols-4 gap-4">
+    <!-- Loading state -->
+    <div v-if="store.isLoading" class="flex items-center justify-center h-32">
+      <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-blue9-600"></div>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="store.error" class="p-4 bg-red-900/50 border border-red-500 rounded-lg">
+      <p class="text-red-400">{{ store.error }}</p>
+    </div>
+
+    <!-- Agents grid -->
+    <div v-else class="grid grid-cols-4 gap-4">
       <div
-        v-for="agent in agentList"
+        v-for="agent in filteredAgents"
         :key="agent.id"
         class="bg-slate-800 rounded-xl border border-slate-700 p-5 hover:border-blue9-500 transition-all hover:shadow-lg hover:shadow-blue9-500/10"
       >
@@ -126,27 +99,15 @@ onMounted(() => {
             <button class="p-1 hover:bg-slate-700 rounded-lg transition-colors">
               <MoreVertical class="w-5 h-5 text-slate-400" />
             </button>
-            <div class="absolute right-0 top-full mt-1 w-32 bg-slate-700 rounded-lg shadow-xl opacity-0 invisible hover:opacity-100 hover:visible transition-all z-10">
-              <button class="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-600 flex items-center gap-2">
-                <Settings class="w-4 h-4" /> Settings
-              </button>
-              <button class="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-600 flex items-center gap-2">
-                <Copy class="w-4 h-4" /> Duplicate
-              </button>
-              <button class="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-slate-600 flex items-center gap-2">
-                <Trash2 class="w-4 h-4" /> Delete
-              </button>
-            </div>
           </div>
         </div>
 
         <div class="mb-4">
           <h3 class="text-lg font-semibold text-white">{{ agent.name }}</h3>
           <div class="flex items-center gap-2 mt-1">
-            <span :class="[
-              'px-2 py-0.5 text-xs rounded-full',
-              agent.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-600 text-slate-400'
-            ]">{{ agent.status }}</span>
+            <span class="px-2 py-0.5 text-xs rounded-full bg-green-500/20 text-green-400">
+              Active
+            </span>
             <span class="text-xs text-slate-400">{{ agent.provider }}</span>
           </div>
         </div>
