@@ -1,4 +1,4 @@
-# AgentForge v2.0 - Technical Requirements Specification
+# blue9 v2.0 - Technical Requirements Specification
 
 **Multi-Agent Orchestration Platform with Humanlike Debate & Collaborative Intelligence**
 
@@ -30,7 +30,7 @@
 ## 1. Vision & Philosophy
 
 ### 1.1 Core Vision
-AgentForge v2.0 envisions a collaborative AI ecosystem where multiple specialized agents form teams, engage in structured debates, share knowledge dynamically, and collectively solve complex problems through orchestrated workflows. Unlike traditional single-agent systems, AgentForge emphasizes **humanlike collaboration** with debate protocols, consensus mechanisms, and transparent reasoning chains.
+blue9 v2.0 envisions a collaborative AI ecosystem where multiple specialized agents form teams, engage in structured debates, share knowledge dynamically, and collectively solve complex problems through orchestrated workflows. Unlike traditional single-agent systems, blue9 emphasizes **humanlike collaboration** with debate protocols, consensus mechanisms, and transparent reasoning chains.
 
 **Key Philosophy:**
 - **Collaborative Intelligence**: Agents don't just execute tasks—they critique, debate, and refine solutions collectively
@@ -41,7 +41,7 @@ AgentForge v2.0 envisions a collaborative AI ecosystem where multiple specialize
 
 ### 1.2 Key Differentiators
 
-| Feature | Traditional Systems | AgentForge v2.0 |
+| Feature | Traditional Systems | blue9 v2.0 |
 |---------|---------------------|-----------------|
 | Agent Communication | Direct message passing | Structured debate with arguments, rebuttals, consensus |
 | Knowledge Management | Static database | Dynamic Brains with semantic graphs |
@@ -367,7 +367,7 @@ interface TeamMember {
 
 ### 4.2 Debate Protocol
 
-The debate system is the core of AgentForge's collaborative intelligence. Agents engage in structured debates to refine solutions, identify weaknesses, and reach consensus.
+The debate system is the core of blue9's collaborative intelligence. Agents engage in structured debates to refine solutions, identify weaknesses, and reach consensus.
 
 **Debate Phases:**
 
@@ -534,7 +534,7 @@ type ProtocolState =
 
 ### 5.1 Brains Architecture
 
-The Brains system is AgentForge's central knowledge repository, designed for efficient storage, retrieval, and semantic querying of organizational knowledge.
+The Brains system is blue9's central knowledge repository, designed for efficient storage, retrieval, and semantic querying of organizational knowledge.
 
 ```typescript
 interface Brain {
@@ -839,7 +839,7 @@ async function syncWithObsidian(config: ObsidianSyncConfig): Promise<SyncResult>
 
 ### 6.1 Memory Architecture
 
-AgentForge implements a **three-tier memory architecture** that mimics human memory organization:
+blue9 implements a **three-tier memory architecture** that mimics human memory organization:
 
 ```typescript
 interface MemorySystem {
@@ -1416,7 +1416,7 @@ async function executePipeline(
 
 ### 8.1 MCP Protocol Implementation
 
-AgentForge implements the Model Context Protocol (MCP) for tool discovery, invocation, and result handling.
+blue9 implements the Model Context Protocol (MCP) for tool discovery, invocation, and result handling.
 
 ```typescript
 interface MCPTool {
@@ -3055,7 +3055,7 @@ const designTokens = {
   <div class="dashboard">
     <!-- Header -->
     <header class="dashboard-header">
-      <h1>AgentForge</h1>
+      <h1>blue9</h1>
       <div class="quick-actions">
         <Button @click="showNewTeamDialog = true">
           <PlusIcon /> New Team
@@ -3964,7 +3964,7 @@ export interface DebateArgument { /* See Section 4.3 */ }
 |------|------------|
 | **Agent** | Autonomous AI entity with role, provider, memory, and skills |
 | **Team** | Group of agents collaborating toward shared goals |
-| **Brain** | AgentForge's knowledge management system |
+| **Brain** | blue9's knowledge management system |
 | **iFlow** | DAG-based intelligent workflow |
 | **Debate** | Structured discussion between agents to reach consensus |
 | **TeamBus** | P2P message routing system for team communication |
@@ -3981,4 +3981,4 @@ export interface DebateArgument { /* See Section 4.3 */ }
 
 **Document Version:** 2.0
 **Last Updated:** May 2026
-**Authors:** AgentForge Development Team
+**Authors:** blue9 Development Team
