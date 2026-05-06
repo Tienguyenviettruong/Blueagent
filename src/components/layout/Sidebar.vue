@@ -6,7 +6,9 @@ import {
   GitBranch,
   Database,
   Settings,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  Plus
 } from 'lucide-vue-next'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -28,48 +30,49 @@ function navigate(path: string) {
 </script>
 
 <template>
-  <aside class="w-64 bg-slate-900 border-r border-slate-700 flex flex-col h-full">
-    <div class="p-6 border-b border-slate-700">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue9-500 to-blue9-700 rounded-xl flex items-center justify-center">
-          <Sparkles class="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <h1 class="text-xl font-bold text-white">blue9</h1>
-          <p class="text-xs text-slate-400">Multi-Agent Platform</p>
-        </div>
+  <aside class="w-16 bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col h-full">
+    <!-- Logo -->
+    <div class="h-14 flex items-center justify-center border-b border-[#1a1a1a]">
+      <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+        <Sparkles class="w-5 h-5 text-white" />
       </div>
     </div>
 
-    <nav class="flex-1 p-4">
-      <ul class="space-y-2">
+    <!-- Navigation -->
+    <nav class="flex-1 py-4">
+      <ul class="space-y-1">
         <li v-for="item in menuItems" :key="item.name">
           <button
             @click="navigate(item.path)"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200"
+            class="w-full flex items-center justify-center py-3 px-2 transition-all duration-200 relative group"
             :class="[
               route.path === item.path
-                ? 'bg-blue9-600 text-white'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'text-white'
+                : 'text-[#666] hover:text-[#999]'
             ]"
           >
             <component :is="item.icon" class="w-5 h-5" />
-            <span class="font-medium">{{ item.name }}</span>
+            
+            <!-- Active indicator -->
+            <div 
+              v-if="route.path === item.path"
+              class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-blue-500 rounded-r-full"
+            />
+            
+            <!-- Tooltip -->
+            <div class="absolute left-14 bg-[#1a1a1a] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+              {{ item.name }}
+            </div>
           </button>
         </li>
       </ul>
     </nav>
 
-    <div class="p-4 border-t border-slate-700">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-          <Users class="w-5 h-5 text-white" />
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-white truncate">Admin</p>
-          <p class="text-xs text-slate-400">Premium</p>
-        </div>
-      </div>
+    <!-- Bottom actions -->
+    <div class="py-4 border-t border-[#1a1a1a]">
+      <button class="w-full flex items-center justify-center py-3 text-[#666] hover:text-[#999] transition-colors">
+        <Plus class="w-5 h-5" />
+      </button>
     </div>
   </aside>
 </template>

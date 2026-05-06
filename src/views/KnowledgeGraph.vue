@@ -8,13 +8,16 @@ import {
   Calendar,
   Database,
   Network,
-  ChevronRight
+  ChevronRight,
+  MoreHorizontal,
+  Filter
 } from 'lucide-vue-next'
 import { useAgentStore } from '@/stores/agentStore'
 import type { KnowledgeItem, GraphNode, GraphEdge, Brain } from '@/types'
 
 const store = useAgentStore()
 const searchQuery = ref('')
+const selectedBrain = ref<string | null>(null)
 
 const brains = ref<Brain[]>([
   {
@@ -147,7 +150,6 @@ const graphEdges = ref<GraphEdge[]>([
   { id: 'e3', source: 'n3', target: 'n4', type: 'evolves_from', weight: 0.8 }
 ])
 
-// Position map for rendering
 const nodePositions: Record<string, { x: number; y: number }> = {
   'n1': { x: 300, y: 100 },
   'n2': { x: 150, y: 250 },
@@ -161,122 +163,141 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="p-6 space-y-6">
+    <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-white">Knowledge Graph</h1>
-        <p class="text-slate-400">Explore and manage your knowledge base</p>
+        <p class="text-[#666] mt-1">Explore and manage your knowledge base</p>
       </div>
-      <button class="flex items-center gap-2 px-4 py-2 bg-blue9-600 hover:bg-blue9-700 text-white rounded-lg transition-colors">
+      <button class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
         <Plus class="w-5 h-5" />
         <span class="font-medium">New Knowledge</span>
       </button>
     </div>
 
-    <div class="grid grid-cols-3 gap-6">
-      <div class="col-span-2 space-y-6">
-        <div class="relative">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search knowledge base..."
-            class="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue9-500 transition-colors"
-          />
-        </div>
+    <!-- Search and Filter -->
+    <div class="flex items-center gap-4">
+      <div class="relative flex-1 max-w-md">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666]" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search knowledge base..."
+          class="w-full pl-9 pr-4 py-2 bg-[#111] border border-[#1a1a1a] rounded-lg text-sm text-[#e5e5e5] placeholder-[#666] focus:outline-none focus:border-[#2a2a2a] transition-colors"
+        />
+      </div>
+      <button class="flex items-center gap-2 px-3 py-2 bg-[#111] border border-[#1a1a1a] rounded-lg text-[#666] hover:text-[#999] transition-colors">
+        <Filter class="w-4 h-4" />
+        <span class="text-sm">Filter</span>
+      </button>
+    </div>
 
-        <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+    <div class="grid grid-cols-3 gap-6">
+      <!-- Knowledge Items -->
+      <div class="col-span-2 space-y-4">
+        <div class="bg-[#111] rounded-xl border border-[#1a1a1a] p-6">
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-lg font-semibold text-white">Knowledge Items</h2>
-            <button class="text-sm text-blue9-400 hover:text-blue9-300 flex items-center gap-1">
+            <div class="flex items-center gap-2">
+              <BookOpen class="w-5 h-5 text-[#666]" />
+              <h2 class="text-lg font-semibold text-white">Knowledge Items</h2>
+            </div>
+            <button class="text-sm text-[#666] hover:text-[#999] flex items-center gap-1 transition-colors">
               View all <ChevronRight class="w-4 h-4" />
             </button>
           </div>
-          <div class="space-y-4">
+          <div class="space-y-3">
             <div
               v-for="item in knowledgeItems"
               :key="item.id"
-              class="p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer"
+              class="p-4 bg-[#0a0a0a] rounded-lg hover:bg-[#1a1a1a] transition-colors cursor-pointer"
             >
               <div class="flex items-start justify-between">
-                <div>
+                <div class="flex-1">
                   <h3 class="font-semibold text-white">{{ item.title }}</h3>
-                  <p class="text-sm text-slate-400 mt-1 line-clamp-2">{{ item.content }}</p>
+                  <p class="text-sm text-[#666] mt-1 line-clamp-2">{{ item.content }}</p>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 ml-4">
                   <span :class="[
                     'px-2 py-0.5 text-xs rounded-full',
-                    item.confidence > 0.9 ? 'bg-green-500/20 text-green-400' :
-                    item.confidence > 0.8 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+                    item.confidence > 0.9 ? 'bg-green-500/10 text-green-400' :
+                    item.confidence > 0.8 ? 'bg-yellow-500/10 text-yellow-400' : 'bg-red-500/10 text-red-400'
                   ]">{{ (item.confidence * 100).toFixed(0) }}%</span>
                 </div>
               </div>
-              <div class="flex items-center gap-4 mt-3">
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="tag in item.tags"
-                    :key="tag"
-                    class="px-2 py-0.5 bg-slate-600 text-slate-300 text-xs rounded-full flex items-center gap-1"
-                  >
-                    <Tag class="w-3 h-3" />
-                    {{ tag }}
-                  </span>
-                </div>
+              <div class="flex items-center gap-2 mt-3">
+                <span
+                  v-for="tag in item.tags"
+                  :key="tag"
+                  class="px-2 py-0.5 bg-[#1a1a1a] text-[#999] text-xs rounded flex items-center gap-1"
+                >
+                  <Tag class="w-3 h-3" />
+                  {{ tag }}
+                </span>
               </div>
-              <div class="flex items-center gap-4 mt-3 pt-3 border-t border-slate-600">
-                <span class="text-xs text-slate-500 flex items-center gap-1">
+              <div class="flex items-center gap-4 mt-3 pt-3 border-t border-[#1a1a1a]">
+                <span class="text-xs text-[#666] flex items-center gap-1">
                   <Calendar class="w-3 h-3" />
                   {{ new Date(item.updated_at).toLocaleDateString() }}
                 </span>
-                <span class="text-xs text-slate-500">{{ item.source.origin }}</span>
+                <span class="text-xs text-[#666]">{{ item.source.origin }}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="space-y-6">
-        <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+      <!-- Right Panel -->
+      <div class="space-y-4">
+        <!-- Brains -->
+        <div class="bg-[#111] rounded-xl border border-[#1a1a1a] p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-white">Knowledge Brains</h2>
-            <Database class="w-5 h-5 text-slate-400" />
+            <div class="flex items-center gap-2">
+              <Database class="w-5 h-5 text-[#666]" />
+              <h2 class="text-lg font-semibold text-white">Brains</h2>
+            </div>
           </div>
           <div class="space-y-3">
             <div
               v-for="brain in brains"
               :key="brain.id"
-              class="p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700 cursor-pointer transition-colors"
+              class="p-4 bg-[#0a0a0a] rounded-lg hover:bg-[#1a1a1a] cursor-pointer transition-colors"
+              :class="{ 'border border-blue-500/30': selectedBrain === brain.id }"
+              @click="selectedBrain = selectedBrain === brain.id ? null : brain.id"
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-700 rounded-lg flex items-center justify-center">
+                  <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                     <BookOpen class="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h4 class="font-medium text-white">{{ brain.name }}</h4>
-                    <span class="text-xs text-slate-400">{{ brain.description }}</span>
+                    <h4 class="font-medium text-white text-sm">{{ brain.name }}</h4>
+                    <p class="text-xs text-[#666]">{{ brain.description }}</p>
                   </div>
                 </div>
                 <span :class="[
                   'px-2 py-0.5 text-xs rounded-full',
-                  brain.owner_scope === 'team' ? 'bg-blue9-500/20 text-blue9-400' :
-                  brain.owner_scope === 'organization' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'
+                  brain.owner_scope === 'team' ? 'bg-blue-500/10 text-blue-400' :
+                  brain.owner_scope === 'organization' ? 'bg-purple-500/10 text-purple-400' : 'bg-green-500/10 text-green-400'
                 ]">{{ brain.owner_scope }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="bg-slate-800 rounded-xl border border-slate-700 p-6">
+        <!-- Graph -->
+        <div class="bg-[#111] rounded-xl border border-[#1a1a1a] p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-white">Knowledge Graph</h2>
-            <Network class="w-5 h-5 text-slate-400" />
+            <div class="flex items-center gap-2">
+              <Network class="w-5 h-5 text-[#666]" />
+              <h2 class="text-lg font-semibold text-white">Graph</h2>
+            </div>
           </div>
-          <div class="h-64 relative">
+          <div class="h-48 relative">
             <svg class="absolute inset-0 w-full h-full">
               <defs>
                 <marker id="graphArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                  <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
                 </marker>
               </defs>
               <line
@@ -286,7 +307,7 @@ onMounted(async () => {
                 :y1="nodePositions[edge.source]?.y || 0"
                 :x2="nodePositions[edge.target]?.x || 0"
                 :y2="nodePositions[edge.target]?.y || 0"
-                stroke="#64748b"
+                stroke="#333"
                 stroke-width="2"
                 marker-end="url(#graphArrow)"
               />
@@ -295,7 +316,7 @@ onMounted(async () => {
                 :key="node.id"
                 :cx="nodePositions[node.id]?.x || 0"
                 :cy="nodePositions[node.id]?.y || 0"
-                r="30"
+                r="25"
                 :fill="node.type === 'concept' ? '#3b82f6' : node.type === 'procedure' ? '#f59e0b' : '#8b5cf6'"
                 class="cursor-pointer hover:opacity-80"
               />
@@ -306,7 +327,7 @@ onMounted(async () => {
                 :y="(nodePositions[node.id]?.y || 0) + 5"
                 text-anchor="middle"
                 fill="white"
-                font-size="11"
+                font-size="10"
                 font-weight="500"
               >{{ node.label }}</text>
             </svg>
